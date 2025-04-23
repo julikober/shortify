@@ -1,63 +1,45 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue'
-import LogoutView from '../views/LogoutView.vue'
-import RefreshView from '../views/RefreshView.vue'
-import { useAuthStore } from '../store/auth'
+import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
-    {
-        path: '/',
-        name: 'Home',
-        component: HomeView,
-    },
-    {
-        path: '/register',
-        name: 'Register',
-        component: RegisterView,
-    },
-    {
-        path: '/login',
-        name: 'Login',
-        component: LoginView,
-    },
-    {
-        path: '/profile',
-        name: 'Profile',
-        component: ProfileView,
-        meta: { requiresAuth: true },
-    },
-    {
-        path: '/logout',
-        name: 'Logout',
-        component: LogoutView,
-    },
-    {
-        path: '/refresh',
-        name: 'Refresh',
-        component: RefreshView,
-    },
-]
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/HomePage.vue')
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/LoginPage.vue')
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/RegisterPage.vue')
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/DashboardPage.vue'),
+    meta: { requiresAuth: true }
+  }
+];
 
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes, // short for `routes: routes`
-})
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+});
 
-router.beforeEach((to, from , next) => {
-    const auth = useAuthStore();
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-        if (auth.isAuthenticated) {
-            next();
-            return;
-        }
-        next("/login");
-    } else {
-        next();
-    }
-
-})
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('token');
+  
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/login');
+  } else if (to.path === '/login' && isAuthenticated) {
+    next('/dashboard');
+  } else {
+    next();
+  }
+});
 
 export default router;

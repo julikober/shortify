@@ -1,4 +1,4 @@
-version: '1.0'
+version: '3.8'
 
 services:
   db:
@@ -29,7 +29,7 @@ services:
     build: ./
     # image: jasonbigcow/oauth2-vue3-nginx
     ports:
-      - 80:8080
+      - 8080:8080  # Changed from 80:8080 to avoid port conflict
     restart: always
     depends_on:
       - backend
@@ -40,5 +40,7 @@ volumes:
   postgres_data:
 
 networks:
-  default: 
-    name: fastapi_vue_network
+  default:
+    name: shortify_network  # Changed network name
+    # Or use external: true if you want to keep using the existing network
+    # external: true
